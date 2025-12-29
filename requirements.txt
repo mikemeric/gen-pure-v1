@@ -1,32 +1,25 @@
-# --- Serveur Web & API ---
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 gunicorn==21.2.0
+jinja2
 python-multipart==0.0.6
-
-# --- Sécurité & Authentification ---
-PyJWT==2.8.0
-bcrypt==4.1.2
+# --- CORRECTION ICI ---
+python-jose[cryptography]
+passlib[bcrypt]
+# ----------------------
 cryptography==42.0.0
 python-dotenv==1.0.0
-passlib[bcrypt]==1.7.4
-
-# --- Base de données & Infrastructure ---
 psycopg2-binary==2.9.9
 sqlalchemy==2.0.25
 redis==5.0.1
 pika==1.3.2
 asyncpg==0.29.0
-
-# --- Intelligence Artificielle & Image (Le cœur de GEN-PURE) ---
 Pillow==10.2.0
 opencv-python-headless==4.9.0.80
 numpy==1.26.3
 scikit-learn==1.4.0
 scipy==1.11.4
 python-magic==0.4.27
-
-# --- Monitoring & Utilitaires ---
 pydantic==2.5.3
 pydantic-settings==2.1.0
 httpx==0.26.0
