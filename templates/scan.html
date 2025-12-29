@@ -3,61 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEN-PURE - Analyse de Pureté</title>
+    <title>GEN-PURE - Nouveau Scan</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        #video { width: 100%; border-radius: 10px; transform: scaleX(1); }
-        .result-card { margin-top: 20px; padding: 15px; border-radius: 10px; display: none; }
-        .status-CRITIQUE { background: #fee2e2; color: #dc2626; border: 1px solid #dc2626; }
-        .status-CONFORME { background: #dcfce7; color: #16a34a; border: 1px solid #16a34a; }
-        .btn { background: #2563eb; color: white; padding: 15px 30px; border: none; border-radius: 50px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: #1e3a8a; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
+        select, input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #manual_origin_div { display: none; margin-top: 10px; }
+        #preview { width: 100%; border-radius: 12px; margin-top: 15px; display: none; border: 2px solid #e5e7eb; }
+        .btn-analyze { background: #1e3a8a; color: white; width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: background 0.3s; }
+        .btn-analyze:hover { background: #1e40af; }
+        .result-card { margin-top: 20px; padding: 20px; border-radius: 12px; display: none; text-align: left; }
+        .critical { background: #fee2e2; border-left: 5px solid #dc2626; color: #991b1b; }
+        .success { background: #dcfce7; border-left: 5px solid #16a34a; color: #166534; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Analyseur de Pureté</h2>
-        <video id="video" autoplay playsinline></video>
-        <button id="capture" class="btn">Scanner l'Échantillon</button>
-        <canvas id="canvas" style="display:none;" width="640" height="480"></canvas>
+        <h2>🔬 Analyse de Pureté</h2>
+        
+        <div class="form-group">
+            <label>📍 Origine / Station :</label>
+            <select id="station_select" onchange="toggleManualInput()">
+                <option value="Station Alpha">Station Alpha</option>
+                <option value="Station Beta">Station Beta</option>
+                <option value="Dépôt Central">Dépôt Central</option>
+                <option value="Camion Citerne">Arrivage Camion</option>
+                <option value="MANUAL">-- Autre (Saisir manuellement) --</option>
+            </select>
+            
+            <div id="manual_origin_div">
+                <label>Nom de la nouvelle origine :</label>
+                <input type="text" id="manual_station_name" placeholder="Ex: Cuve Mobile 04">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>📸 Photo de l'échantillon :</label>
+            <input type="file" id="image_input" accept="image/*" capture="environment">
+            <small style="color: #666;">Prenez une photo ou choisissez un fichier dans la galerie</small>
+        </div>
+
+        <img id="preview" alt="Aperçu du scan">
+
+        <button id="run_analysis" class="btn-analyze">Lancer l'Analyse</button>
 
         <div id="resultBox" class="result-card">
             <h3 id="resStatus">--</h3>
-            <p>Turbidité : <span id="resTurb">0</span>%</p>
-            <p>Eau détectée : <span id="resWater">Non</span></p>
-            <p>Impuretés : <span id="resPart">0</span> particules</p>
-            <p><strong id="resAdvice"></strong></p>
+            <p><strong>Turbidité :</strong> <span id="resTurb">0</span>%</p>
+            <p><strong>Eau détectée :</strong> <span id="resWater">Non</span></p>
+            <p><strong>Impuretés :</strong> <span id="resPart">0</span></p>
+            <p id="resAdvice" style="font-weight: bold; margin-top: 10px;"></p>
         </div>
     </div>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureBtn = document.getElementById('capture');
+        const imageInput = document.getElementById('image_input');
+        const preview = document.getElementById('preview');
+        const runBtn = document.getElementById('run_analysis');
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(stream => video.srcObject = stream);
+        function toggleManualInput() {
+            const select = document.getElementById('station_select');
+            const manualDiv = document.getElementById('manual_origin_div');
+            manualDiv.style.display = (select.value === 'MANUAL') ? 'block' : 'none';
+        }
 
-        captureBtn.addEventListener('click', async () => {
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, 640, 480);
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        runBtn.addEventListener('click', async () => {
+            const file = imageInput.files[0];
+            let station = document.getElementById('station_select').value;
             
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('file', blob);
+            if (station === 'MANUAL') {
+                station = document.getElementById('manual_station_name').value;
+            }
 
+            if (!file || !station) {
+                alert("Veuillez renseigner l'origine et choisir une photo.");
+                return;
+            }
+
+            runBtn.innerText = "Analyse en cours...";
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('station', station);
+
+            try {
                 const response = await fetch('/api/detection/detect', { method: 'POST', body: formData });
                 const data = await response.json();
 
                 const box = document.getElementById('resultBox');
                 box.style.display = 'block';
-                box.className = 'result-card status-' + data.status;
-                document.getElementById('resStatus').innerText = data.status;
+                box.className = 'result-card ' + (data.status === 'CONFORME' ? 'success' : 'critical');
+                
+                document.getElementById('resStatus').innerText = "Résultat : " + data.status;
                 document.getElementById('resTurb').innerText = data.turbidity;
-                document.getElementById('resWater').innerText = data.water_present ? "OUI (ALERTE)" : "Non";
-                document.getElementById('resPart').innerText = data.impurities_found;
+                document.getElementById('resWater').innerText = data.water_present ? "OUI (Présence d'eau !)" : "Non (Absence d'eau)";
+                document.getElementById('resPart').innerText = data.impurities_found + " particules détectées";
                 document.getElementById('resAdvice').innerText = data.recommendation;
-            }, 'image/jpeg');
+            } catch (err) {
+                alert("Erreur de connexion avec le serveur.");
+            } finally {
+                runBtn.innerText = "Lancer l'Analyse";
+            }
         });
     </script>
 </body>
