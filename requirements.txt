@@ -4,6 +4,7 @@ gunicorn==21.2.0
 jinja2
 python-multipart==0.0.6
 python-jose[cryptography]
+PyJWT==2.8.0
 passlib[bcrypt]
 cryptography==42.0.0
 python-dotenv==1.0.0
@@ -22,5 +23,4 @@ pydantic==2.5.3
 pydantic-settings==2.1.0
 httpx==0.26.0
 requests==2.31.0
-# --- AJOUTS RÉCENTS ---
 fpdf2
