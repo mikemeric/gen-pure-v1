@@ -3,10 +3,8 @@ uvicorn[standard]==0.27.0
 gunicorn==21.2.0
 jinja2
 python-multipart==0.0.6
-# --- CORRECTION ICI ---
 python-jose[cryptography]
 passlib[bcrypt]
-# ----------------------
 cryptography==42.0.0
 python-dotenv==1.0.0
 psycopg2-binary==2.9.9
@@ -24,3 +22,5 @@ pydantic==2.5.3
 pydantic-settings==2.1.0
 httpx==0.26.0
 requests==2.31.0
+# --- AJOUTS RÉCENTS ---
+fpdf2
