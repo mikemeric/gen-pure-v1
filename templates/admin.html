@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEN-PURE | Administration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
+
+    <header class="bg-gray-800 border-b border-red-900/30 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-red-600 p-2 rounded-lg shadow-lg shadow-red-500/20">
+                    <i class="ph-bold ph-wrench text-white text-xl"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight">GEN-PURE <span class="text-red-500">ADMIN</span></span>
+            </div>
+            <nav class="flex gap-6 text-sm font-medium">
+                <a href="/manager" class="text-gray-400 hover:text-white transition">Vue Manager</a>
+                <a href="/" class="text-red-400 hover:text-red-300 transition">Déconnexion</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <i class="ph ph-users text-blue-400"></i> Comptes Utilisateurs
+                        </h2>
+                        <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-bold transition">
+                            + Nouvel Utilisateur
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="text-gray-500 uppercase text-xs border-b border-gray-700">
+                                <tr>
+                                    <th class="py-3">Utilisateur</th>
+                                    <th>Rôle</th>
+                                    <th>Statut</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                <tr>
+                                    <td class="py-4 font-medium">Dr. Emeric</td>
+                                    <td><span class="bg-purple-900/30 text-purple-400 px-2 py-1 rounded text-xs">SuperAdmin</span></td>
+                                    <td><span class="text-green-400 flex items-center gap-1"><i class="ph-fill ph-circle text-[8px]"></i> Actif</span></td>
+                                    <td class="text-right text-gray-400"><button class="hover:text-white"><i class="ph ph-pencil-simple"></i></button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 font-medium">Auditeur_Sud_01</td>
+                                    <td><span class="bg-blue-900/30 text-blue-400 px-2 py-1 rounded text-xs">Auditeur</span></td>
+                                    <td><span class="text-green-400 flex items-center gap-1"><i class="ph-fill ph-circle text-[8px]"></i> Actif</span></td>
+                                    <td class="text-right text-gray-400"><button class="hover:text-white"><i class="ph ph-pencil-simple"></i></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gray-800 rounded-xl p-6 border border-gray-700 shadow-xl">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+                        <i class="ph ph-cpu text-green-400"></i> État du Système
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
+                            <span class="text-sm">Base de données</span>
+                            <span class="text-red-500 text-xs font-bold uppercase">Déconnecté</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
+                            <span class="text-sm">Serveur API</span>
+                            <span class="text-green-500 text-xs font-bold uppercase">En ligne</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
+                            <span class="text-sm">Modèle IA v3.0</span>
+                            <span class="text-green-500 text-xs font-bold uppercase">Chargé</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-red-900/10 rounded-xl p-6 border border-red-900/30 shadow-xl">
+                    <h2 class="text-lg font-bold mb-4 text-red-400">Zone de Danger</h2>
+                    <p class="text-xs text-gray-400 mb-4">Actions irréversibles sur la base de données et les clés de chiffrement.</p>
+                    <button class="w-full border border-red-600/50 text-red-500 hover:bg-red-600 hover:text-white py-2 rounded-lg text-sm font-bold transition">
+                        Réinitialiser les Clés
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

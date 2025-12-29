@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GEN-PURE. | Intelligence Carburant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;700&display=swap');
+        :root { --blue: #003366; --orange: #FF4B4B; --bg: #f4f7f6; --white: #ffffff; }
+        body { font-family: 'Open Sans', sans-serif; background-color: var(--bg); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* BRANDING GEN-PURE. */
+        .top-bar { background: var(--blue); color: white; padding: 15px; display: flex; align-items: center; z-index: 1000; }
+        .menu-btn { font-size: 24px; cursor: pointer; margin-right: 15px; }
+        .top-title { font-family: 'Montserrat'; font-weight: 900; font-size: 18px; flex: 1; letter-spacing: -1px; }
+        .top-title span { color: var(--orange); }
+
+        /* SIDEBAR */
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--white); box-shadow: 5px 0 15px rgba(0,0,0,0.1); transition: 0.3s; z-index: 2000; display: flex; flex-direction: column; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { background: var(--blue); color: white; padding: 30px 20px; font-family: 'Montserrat'; font-weight: 900; font-size: 20px; }
+        .sidebar-header span { color: var(--orange); }
+        .sidebar-item { padding: 15px 20px; border-bottom: 1px solid #eee; color: var(--blue); font-weight: bold; cursor: pointer; display: flex; align-items: center; }
+        .sidebar-item:active { background: #f0f0f0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+
+        /* VUES */
+        .view { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; padding-bottom: 80px; }
+        .view.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 5px solid var(--blue); }
+        .btn { background: var(--blue); color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; font-weight: bold; font-family: 'Montserrat'; text-transform: uppercase; cursor: pointer; }
+        .btn-back { background: #ccc; flex: 1; }
+        .btn-next { flex: 2; }
+        .nav-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        
+        .label { display: block; font-size: 11px; font-weight: bold; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        .input-field, select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 15px; box-sizing: border-box; margin-bottom: 15px; }
+
+        /* HISTORIQUE LIST */
+        .history-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .status-badge { padding: 4px 8px; border-radius: 5px; font-size: 10px; font-weight: bold; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="menu-btn" onclick="toggleMenu()">☰</div>
+        <div class="top-title">GEN-<span>PURE.</span></div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">GEN-<span>PURE.</span></div>
+        <div class="sidebar-item" onclick="switchTab('dashboard')">🏠 Tableau de Bord</div>
+        <div class="sidebar-item" onclick="switchTab('step1')">🛡️ Lancer un Contrôle</div>
+        <div class="sidebar-item" onclick="switchTab('history')">📋 Historique des Scans</div>
+        <div class="sidebar-item" onclick="switchTab('settings')">⚙️ Configuration Démo</div>
+        <div class="sidebar-item" style="margin-top:auto; color:var(--orange);" onclick="location.reload()">🔄 Déconnexion</div>
+    </div>
+
+    <div id="view-dashboard" class="view active">
+        <h3 style="font-family:'Montserrat'; color:var(--blue);">BIENVENUE</h3>
+        <div class="card" onclick="switchTab('step1')" style="cursor:pointer; border-left-color:var(--orange);">
+            <div style="font-size:40px; margin-bottom:10px;">⛽</div>
+            <div style="font-weight:900; color:var(--blue); font-size:18px;">LANCER UN CONTRÔLE</div>
+            <div style="font-size:12px; color:#888;">Analyse de pureté en temps réel</div>
+        </div>
+        <div id="demo-badge" style="display:none; background:var(--orange); color:white; padding:10px; border-radius:10px; font-size:11px; font-weight:bold; text-align:center;">
+            MODE SIMULATION ACTIF
+        </div>
+    </div>
+
+    <div id="view-step1" class="view">
+        <span class="label">Étape 1 sur 2</span>
+        <h3 style="font-family:'Montserrat'; color:var(--blue); margin-top:5px;">POINT DE RAVITAILLEMENT</h3>
+        <div class="card">
+            <span class="label">Sélectionner ou Ajouter :</span>
+            <select id="select-station" onchange="checkManual()">
+                <option value="">-- Choisir --</option>
+                <option value="TOTAL">TOTAL Energies</option>
+                <option value="TRADEX">TRADEX</option>
+                <option value="OLA">OLA Energy</option>
+                <option value="AUTRE">➕ AJOUTER STATION...</option>
+            </select>
+            <div id="manual-box" style="display:none;">
+                <input type="text" id="manual-name" class="input-field" placeholder="Nom de la station">
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-back" onclick="switchTab('dashboard')">RETOUR</button>
+                <button class="btn btn-next" onclick="validateStep1()">CONTINUER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-scan" class="view">
+        <span class="label">Étape 2 sur 2</span>
+        <h3 style="font-family:'Montserrat'; color:var(--blue); margin-top:5px;">ANALYSE OPTIQUE</h3>
+        <div class="card" style="text-align:center;">
+            <div id="circle" style="width:140px; height:140px; border-radius:50%; border:8px solid #eee; margin:10px auto; display:flex; align-items:center; justify-content:center; background:white; font-size:40px;">📷</div>
+            <div id="status-text" style="font-weight:bold; color:var(--blue); font-size:18px;">PRÊT</div>
+            <div id="station-label" style="font-size:11px; color:#888; margin-top:5px;"></div>
+        </div>
+        <button class="btn" onclick="document.getElementById('cameraInput').click()">CAPTURER L'ÉCHANTILLON</button>
+        <input type="file" id="cameraInput" accept="image/*" style="display:none;">
+        <div class="nav-buttons">
+            <button class="btn btn-back" onclick="switchTab('step1')">RETOUR</button>
+        </div>
+    </div>
+
+    <div id="view-history" class="view">
+        <h3 style="font-family:'Montserrat'; color:var(--blue);">HISTORIQUE DES SCANS</h3>
+        <div class="card" style="padding:0;">
+            <div class="history-item">
+                <div><strong>CAM-102 (TOTAL)</strong><br><small>21/12 - 14:05</small></div>
+                <div class="status-badge" style="background:var(--success)">OK</div>
+            </div>
+            <div class="history-item">
+                <div><strong>CAM-204 (TRADEX)</strong><br><small>21/12 - 09:12</small></div>
+                <div class="status-badge" style="background:var(--orange)">EAU</div>
+            </div>
+        </div>
+        <button class="btn btn-outline" onclick="switchTab('dashboard')">RETOUR ACCUEIL</button>
+    </div>
+
+    <div id="view-settings" class="view">
+        <h3 style="font-family:'Montserrat'; color:var(--blue);">OPTIONS EXPERTS</h3>
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:bold;">Mode Démo</span>
+                <label class="switch">
+                    <input type="checkbox" id="demo-toggle" onchange="toggleDemo()">
+                    <span class="slider" style="position:relative; display:inline-block; width:40px; height:20px; background:#ccc; border-radius:20px;"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let demo = false;
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').style.display = document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none'; }
+        function switchTab(n) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById('view-'+n).classList.add('active'); if(document.getElementById('sidebar').classList.contains('open')) toggleMenu(); }
+        function checkManual() { document.getElementById('manual-box').style.display = (document.getElementById('select-station').value === 'AUTRE') ? 'block' : 'none'; }
+        function toggleDemo() { demo = document.getElementById('demo-toggle').checked; document.getElementById('demo-badge').style.display = demo ? 'block' : 'none'; }
+        function validateStep1() { if(!document.getElementById('select-station').value) { alert("Choisissez une station"); return; } switchTab('scan'); }
+        function triggerCamera() { document.getElementById('cameraInput').click(); }
+
+        document.getElementById('cameraInput').addEventListener('change', function() {
+            const c = document.getElementById('circle');
+            const t = document.getElementById('status-text');
+            c.innerText = "⏳"; t.innerText = "ANALYSE...";
+            setTimeout(() => {
+                if(demo) { c.innerText = "🚨"; c.style.borderColor = "var(--orange)"; t.innerText = "NON-CONFORME"; t.style.color = "var(--orange)"; }
+                else { c.innerText = "✅"; c.style.borderColor = "var(--success)"; t.innerText = "CONFORME"; t.style.color = "var(--success)"; }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

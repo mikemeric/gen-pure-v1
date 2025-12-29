@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: detection-api
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    depends_on:
+      - db
+      - cache
+      - queue
+    networks:
+      - detection-network
+    volumes:
+      - ../:/app
+
+  db:
+    image: postgres:15-alpine
+    container_name: detection-db
+    environment:
+      POSTGRES_USER: detector
+      POSTGRES_PASSWORD: password_super_securise_GIM
+      POSTGRES_DB: detection_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - detection-network
+
+  cache:
+    image: redis:7-alpine
+    container_name: detection-cache
+    # PAS DE PORTS EXTERNES ICI POUR EVITER LE CONFLIT
+    volumes:
+      - redis-data:/data
+    networks:
+      - detection-network
+
+  queue:
+    image: rabbitmq:3-management-alpine
+    container_name: detection-queue
+    environment:
+      RABBITMQ_DEFAULT_USER: detector
+      RABBITMQ_DEFAULT_PASS: password_super_securise_GIM
+    ports:
+      - "15672:15672" 
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - detection-network
+
+networks:
+  detection-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  rabbitmq-data:
