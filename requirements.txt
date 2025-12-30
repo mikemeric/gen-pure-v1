@@ -16,6 +16,7 @@ cryptography==42.0.0
 python-magic==0.4.27
 
 # --- MÉMOIRE & BASES DE DONNÉES (ARCHIVISTE / CHRONOS) ---
+# Note : Inclus PostgreSQL pour le déploiement sur Render/Cloud
 psycopg2-binary==2.9.9
 sqlalchemy==2.0.25
 asyncpg==0.29.0
@@ -32,7 +33,7 @@ scipy==1.11.4
 Pillow==10.2.0
 google-generativeai>=0.3.0
 
-# --- CERTIFICATION & SÉCURITÉ (LÉGISTE) ---
+# --- CERTIFICATION & ANALYSE BI (LÉGISTE / BI-GENERATOR) ---
 fpdf2==2.7.6
 qrcode==7.4.2
 reportlab==4.0.7
