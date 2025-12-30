@@ -5,78 +5,84 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 
 class GlobalIntelligenceUnit:
-    """Agent SENTINELLE V3 : IA Souveraine Auto-Apprenante"""
-
     def __init__(self):
         self.model_path = "data/omega_model.pkl"
-        os.makedirs("data", exist_ok=True)
-        self.model = self._load_model()
+        self.model = self._load()
 
-    def _load_model(self):
+    def _load(self):
         if os.path.exists(self.model_path):
-            try:
-                with open(self.model_path, 'rb') as f:
-                    return pickle.load(f)
-            except: pass
-        # Modèle par défaut : Forêt Aléatoire
+            with open(self.model_path, 'rb') as f: return pickle.load(f)
         return RandomForestClassifier(n_estimators=100)
 
-    def _extract_features(self, image_bytes):
-        """Extraction de la signature numérique du carburant (Vision par ordinateur)"""
-        nparr = np.frombuffer(image_bytes, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if img is None: return None
+    def _analyze_physics(self, img):
+        # 1. Analyse EAU (Séparation de phase bas de tube)
+        h, w, _ = img.shape
+        bottom = img[int(h*0.85):, :] # Fond du tube
+        top = img[int(h*0.2):int(h*0.6), :] # Milieu du tube
         
-        img = cv2.resize(img, (100, 100))
+        # Si le fond est beaucoup plus clair/foncé que le milieu -> Eau
+        water_risk = abs(np.mean(bottom) - np.mean(top)) > 40
         
-        # Couleurs moyennes (BGR)
-        avg_color = cv2.mean(img)[:3]
-        
-        # Turbidité (Écart-type de la luminance)
+        # 2. Analyse SÉDIMENTS (Impuretés solides)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        turbidity_score = gray.std()
+        edges = cv2.Canny(gray, 100, 200)
+        impurities = np.count_nonzero(edges)
         
-        # Pureté/Texture (Variance du Laplacien)
-        purity_score = cv2.Laplacian(gray, cv2.CV_64F).var()
+        # 3. Analyse TURBIDITÉ (Trouble)
+        turbidity = gray.std()
         
-        return np.array([*avg_color, turbidity_score, purity_score])
+        return {"water": water_risk, "sediments": impurities, "turbidity": turbidity, "avg_color": cv2.mean(img)[:3]}
 
-    async def analyze_with_turbo_mode(self, image_bytes, station):
-        features = self._extract_features(image_bytes)
+    async def analyze_with_turbo_mode(self, img_bytes, station):
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None: return {"risk_level": "REJET", "diagnostic": "Image noire/invalide"}
+
+        img_std = cv2.resize(img, (200, 300))
+        phys = self._analyze_physics(img_std)
+
+        # LOGIQUE MÉTIER CAMEROUN (Zoa-Zoa vs Bon Gasoil)
+        verdict = []
+        risk_score = 0
         
-        if features is None:
-            return {"risk_level": "REJET", "diagnostic": "Image illisible."}
+        # Critère 1 : Eau (Mortel pour injecteurs)
+        if phys['water']:
+            verdict.append("EAU DÉTECTÉE (Séparation Phase)")
+            risk_score += 60
+            
+        # Critère 2 : Sédiments (Bouche les filtres)
+        if phys['sediments'] > 2000:
+            verdict.append(f"SÉDIMENTS CRITIQUES ({phys['sediments']} ppm)")
+            risk_score += 30
+            
+        # Critère 3 : Turbidité (Mélange pétrole lampant/eau)
+        if phys['turbidity'] < 15: # Trop "plat" visuellement
+            verdict.append("OPACITÉ SUSPECTE (Mélange ?)")
+            risk_score += 20
 
-        # Détection de Rejet (Si l'image est trop uniforme ou sombre - ex: cheveux/doigt)
-        if features[3] < 5: 
-            return {"risk_level": "REJET", "diagnostic": "Objet non identifié détecté."}
+        final_risk = "NORMAL"
+        if risk_score >= 50: final_risk = "DANGER CRITIQUE"
+        elif risk_score > 0: final_risk = "ATTENTION"
+        
+        diag_text = " // ".join(verdict) if verdict else "Carburant conforme. Pas d'anomalie visible."
 
-        try:
-            # Prédiction IA
-            prediction = self.model.predict([features])[0]
-            risk = "DANGER" if prediction == 1 else "NORMAL"
-        except:
-            # Mode secours si non entraîné
-            risk = "DANGER" if features[3] > 40 else "NORMAL"
+        # Extraction features pour ML
+        features = [*phys['avg_color'], phys['turbidity'], float(phys['sediments'])]
 
         return {
-            "risk_level": risk,
-            "turbidity": round(features[3], 2),
-            "diagnostic": f"Analyse IA Locale : {risk}",
-            "features": features.tolist()
+            "risk_level": final_risk,
+            "turbidity": round(phys['turbidity'], 2),
+            "water_presence": phys['water'],
+            "impurities": phys['sediments'],
+            "diagnostic": diag_text,
+            "features": features
         }
 
-    def train_model(self, data_list):
-        """L'IA apprend des décisions du Général"""
-        X, y = [], []
-        for d in data_list:
-            if 'features' in d and 'manual_validation' in d:
-                X.append(d['features'])
-                y.append(1 if d['manual_validation'] == 'DANGER' else 0)
+    def train_model(self, data):
+        # Apprentissage sur les corrections manuelles (vrai ML)
+        X = [d['features'] for d in data if 'features' in d and 'manual_validation' in d]
+        y = [1 if d['manual_validation'] != 'NORMAL' else 0 for d in data if 'features' in d and 'manual_validation' in d]
         
-        if len(y) >= 3:
+        if len(y) >= 5:
             self.model.fit(X, y)
-            with open(self.model_path, 'wb') as f:
-                pickle.dump(self.model, f)
-            return True
-        return False
+            with open(self.model_path, 'wb') as f: pickle.dump(self.model, f)
