@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEN-PURE | AUTHENTIFICATION OMEGA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .bg-gradient-omega { background: radial-gradient(circle at top right, #1e3a8a, #020617); }
+        .input-glow:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+    </style>
+</head>
+<body class="bg-gradient-omega h-screen flex items-center justify-center p-4 overflow-hidden">
+
+    <div class="w-full max-w-md animate-in fade-in zoom-in duration-500">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-3xl shadow-2xl shadow-blue-500/20 mb-4 transform -rotate-12">
+                <i class="fas fa-droplet text-white text-4xl"></i>
+            </div>
+            <h1 class="text-3xl font-black text-white italic tracking-tighter uppercase">GEN-PURE <span class="text-blue-500">OMEGA</span></h1>
+            <p class="text-[10px] text-slate-500 font-bold tracking-[0.4em] mt-2">UNITÉ DE CONTRÔLE STRATÉGIQUE</p>
+        </div>
+
+        <div class="glass p-8 md:p-10 rounded-[3rem] shadow-2xl">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-white font-bold text-lg uppercase tracking-widest">Identification</h2>
+                <i class="fas fa-shield-halved text-blue-500 animate-pulse"></i>
+            </div>
+
+            {% if error %}
+            <div class="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black p-3 rounded-xl mb-6 text-center uppercase">
+                <i class="fas fa-triangle-exclamation mr-2"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="/login" method="post" class="space-y-6">
+                <div class="relative group">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
+                    <input type="text" name="username" placeholder="Identifiant État-Major" required
+                           class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white text-sm outline-none transition-all input-glow">
+                </div>
+
+                <div class="relative group">
+                    <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
+                    <input type="password" name="password" placeholder="Code d'Accès" required
+                           class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white text-sm outline-none transition-all input-glow">
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest text-xs">
+                    Initialiser la Session
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center text-slate-600 text-[9px] mt-8 uppercase tracking-[0.2em]">
+            © 2024 GEN-PURE | Phase 4 : Protocole Gardien Actif
+        </p>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>GEN-PURE | MODE VISION</title>
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .vs-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    </style>
+</head>
+<body class="bg-[#020617] text-slate-100 p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-12">
+            <a href="/manager" class="text-slate-500 hover:text-white transition-all"><i class="fas fa-arrow-left mr-2"></i> Retour Dashboard</a>
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">ANALYSE COMPARATIVE <span class="text-blue-500">VISION</span></h1>
+            <div class="vs-badge px-4 py-1 rounded-full text-[10px] font-bold">DELTA: {{ data.analysis.delta }} NTU</div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+            <div class="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-12 h-12 glass rounded-full items-center justify-center border border-blue-500/30 text-blue-500 font-black italic">VS</div>
+
+            <div class="glass p-8 rounded-[2.5rem] border-t-4 border-blue-500">
+                <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase">Référence A</p>
+                <h2 class="text-2xl font-black mb-1">{{ data.scan_a.station }}</h2>
+                <code class="text-slate-500 text-xs">{{ data.scan_a.id }}</code>
+                
+                <div class="mt-8 space-y-6">
+                    <div class="bg-white/5 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-500 block mb-1 uppercase">Turbidité</span>
+                        <span class="text-xl font-bold">{{ data.scan_a.values[0] }} NTU</span>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-500 block mb-1 uppercase">Verdict</span>
+                        <span class="font-black {{ 'text-red-500' if data.scan_a.values[2] == 'DANGER' else 'text-emerald-500' }}">{{ data.scan_a.values[2] }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass p-8 rounded-[2.5rem] border-t-4 border-slate-500">
+                <p class="text-[10px] text-slate-500 font-bold mb-2 uppercase">Comparaison B</p>
+                <h2 class="text-2xl font-black mb-1">{{ data.scan_b.station }}</h2>
+                <code class="text-slate-500 text-xs">{{ data.scan_b.id }}</code>
+                
+                <div class="mt-8 space-y-6">
+                    <div class="bg-white/5 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-500 block mb-1 uppercase">Turbidité</span>
+                        <span class="text-xl font-bold">{{ data.scan_b.values[0] }} NTU</span>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-500 block mb-1 uppercase">Verdict</span>
+                        <span class="font-black {{ 'text-red-500' if data.scan_b.values[2] == 'DANGER' else 'text-emerald-500' }}">{{ data.scan_b.values[2] }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12 glass p-6 rounded-3xl text-center border border-blue-500/20">
+            <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-blue-400 mb-2">Conclusion de l'Agent VISION</h3>
+            <p class="text-lg">Tendance détectée : <span class="font-black uppercase {{ 'text-red-500' if data.analysis.status == 'DÉGRADATION' else 'text-emerald-500' }}">{{ data.analysis.status }}</span></p>
+        </div>
+    </div>
+</body>
+</html>

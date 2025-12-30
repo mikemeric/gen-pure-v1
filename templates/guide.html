@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEN-PURE | GUIDE OPÉRATIONNEL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .step-number { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        body { background: radial-gradient(circle at top right, #0f172a, #020617); }
+    </style>
+</head>
+<body class="text-slate-200 font-sans antialiased pb-20">
+
+    <header class="py-12 text-center border-b border-white/5 mb-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/20">
+            <i class="fas fa-book-open text-white text-2xl"></i>
+        </div>
+        <h1 class="text-4xl font-black italic tracking-tighter text-white uppercase">Manuel de Stratégie <span class="text-blue-500 text-3xl">v5.0</span></h1>
+        <p class="text-slate-500 text-xs font-bold tracking-[0.4em] mt-2 uppercase">Système de Défense OMEGA</p>
+    </header>
+
+    <div class="max-w-5xl mx-auto px-6 space-y-12">
+
+        <section class="glass p-8 rounded-[2.5rem]">
+            <h2 class="text-xl font-black mb-8 flex items-center">
+                <i class="fas fa-robot text-blue-500 mr-4"></i> ÉCOSYSTÈME DES AGENTS IA
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <i class="fas fa-eye text-blue-400 mb-3"></i>
+                    <h3 class="font-bold text-sm mb-2 text-white">SENTINELLE</h3>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">Analyse visuelle et spectrométrique du carburant en temps réel.</p>
+                </div>
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <i class="fas fa-shield-halved text-emerald-400 mb-3"></i>
+                    <h3 class="font-bold text-sm mb-2 text-white">GARDIEN</h3>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">Verrouillage des accès, cryptage JWT et signatures numériques.</p>
+                </div>
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <i class="fas fa-bolt text-red-400 mb-3"></i>
+                    <h3 class="font-bold text-sm mb-2 text-white">SPECTRE</h3>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">Intervention rapide et alertes emails automatiques en cas de danger.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-black mb-8 flex items-center">
+                <i class="fas fa-project-diagram text-blue-500 mr-4"></i> PROTOCOLE D'INTERVENTION
+            </h2>
+            <div class="space-y-6">
+                <div class="flex items-start space-x-6">
+                    <div class="step-number w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-black text-white shadow-lg">1</div>
+                    <div class="glass p-6 rounded-3xl flex-1">
+                        <h4 class="font-bold text-white mb-2 italic">Acquisition & Scan</h4>
+                        <p class="text-sm text-slate-400">Le technicien utilise le terminal <code class="text-blue-400">/scan</code>. L'IA identifie la station et traite l'image haute résolution pour détecter l'eau libre ou la turbidité.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-6">
+                    <div class="step-number w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-black text-white shadow-lg">2</div>
+                    <div class="glass p-6 rounded-3xl flex-1">
+                        <h4 class="font-bold text-white mb-2 italic">Certification Légiste</h4>
+                        <p class="text-sm text-slate-400">Génération automatique d'un certificat PDF inviolable. Ce document contient le QR Code de traçabilité et le sceau numérique de l'État-Major.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-6">
+                    <div class="step-number w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-black text-white shadow-lg">3</div>
+                    <div class="glass p-6 rounded-3xl flex-1">
+                        <h4 class="font-bold text-white mb-2 italic">Surveillance Réseau</h4>
+                        <p class="text-sm text-slate-400">Accès au dashboard <code class="text-blue-400">/manager</code>. Visualisation cartographique des flux pour détecter les contaminations systémiques en amont.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass p-8 rounded-[2.5rem] border-l-4 border-blue-500">
+                <h3 class="font-black text-white mb-4 uppercase text-xs tracking-widest">Accès Prioritaire</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between p-3 bg-white/5 rounded-xl italic">
+                        <span class="text-slate-500">Identifiant :</span>
+                        <span class="text-white font-mono">Idriss</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white/5 rounded-xl italic">
+                        <span class="text-slate-500">Code Secret :</span>
+                        <span class="text-white font-mono">OMEGA123</span>
+                    </div>
+                </div>
+            </div>
+            <div class="glass p-8 rounded-[2.5rem] border-l-4 border-red-500">
+                <h3 class="font-black text-white mb-4 uppercase text-xs tracking-widest text-red-500">Urgence SPECTRE</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Toute détection de niveau <span class="text-red-500 font-bold">DANGER</span> déclenche l'envoi d'un email crypté à l'État-Major. L'intervention doit être immédiate pour stopper le camion ou sceller la cuve.
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="text-center mt-20 text-slate-600 text-[10px] uppercase tracking-widest">
+        © 2024 GEN-PURE | DOCUMENT SCELLÉ PAR L'AGENT GARDIEN
+    </footer>
+
+</body>
+</html>

@@ -1,42 +1,70 @@
 import cv2
 import numpy as np
+from PIL import Image
+import io
+import google.generativeai as genai
 
-class FuelLevelDetector:
-    async def analyze(self, image_bytes):
+class GlobalIntelligenceUnit:
+    """Agent SENTINELLE : Expertise visuelle et chimique par IA"""
+
+    def __init__(self):
+        # Configuration du modèle de vision OMEGA
+        genai.configure(api_key="VOTRE_CLE_API_GOOGLE")
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
+
+    async def analyze_with_turbo_mode(self, image_bytes, station_name, history_data=None):
+        """
+        Analyse hybride : OpenCV pour les métriques physiques + Gemini pour le diagnostic expert.
+        """
+        # 1. PRÉ-TRAITEMENT VISION (OpenCV & NumPy)
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if img is None: return {"status": "ERREUR IMAGE"}
-
-        # Conversion et réduction du bruit
+        
+        # Calcul de la turbidité via la variance du Laplacien (netteté/particules)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        turbidity_score = cv2.Laplacian(gray, cv2.CV_64F).var()
+        
+        # Normalisation du score (0 à 100) pour l'Agent VISION
+        normalized_turbidity = min(max(round(turbidity_score / 10, 2), 0.5), 99.0)
 
-        # 1. Calcul de la Turbidité (Basé sur la fréquence des contrastes)
-        edges_full = cv2.Canny(blurred, 100, 200)
-        edge_density = np.sum(edges_full > 0) / (gray.size)
-        turbidity = round(max(0, min(100, (1-edge_density*50) * 100)), 1)
+        # 2. ANALYSE EXPERTE (Gemini Vision)
+        pil_img = Image.open(io.BytesIO(image_bytes))
+        
+        prompt = f"""
+        ANALYSE TACTIQUE GEN-PURE OMEGA
+        Station: {station_name}
+        Métriques physiques : Turbidité détectée à {normalized_turbidity} NTU.
+        
+        Instructions : 
+        1. Détecter la présence d'eau libre (bulles ou séparation de phase).
+        2. Analyser la clarté du carburant.
+        3. Rendre un verdict : CONFORME, VIGILANCE ou DANGER.
+        
+        Format de réponse JSON uniquement :
+        {{
+            "status": "Verdict",
+            "risk_level": "DANGER/VIGILANCE/NORMAL",
+            "diagnostic": "Explication courte",
+            "turbidity": {normalized_turbidity}
+        }}
+        """
 
-        # 2. Détection d'Eau (Séparation de phase par gradient de densité)
-        h, w = gray.shape
-        roi_bottom = gray[int(h*0.65):h, :] # On focus sur le bas de l'éprouvette
-        edges_bottom = cv2.Canny(roi_bottom, 30, 100)
-        lines = cv2.HoughLinesP(edges_bottom, 1, np.pi/180, 50, minLineLength=w*0.4)
-        water_detected = lines is not None
+        try:
+            response = await self.model.generate_content_async([prompt, pil_img])
+            # Nettoyage et extraction du JSON de la réponse
+            result = self._parse_json_response(response.text)
+            return result
+        except Exception as e:
+            # Mode dégradé si l'API échoue
+            return {
+                "status": "MODE DÉGRADÉ",
+                "risk_level": "VIGILANCE" if normalized_turbidity > 50 else "NORMAL",
+                "diagnostic": f"Analyse locale effectuée. Turbidité: {normalized_turbidity}",
+                "turbidity": normalized_turbidity
+            }
 
-        # Diagnostic
-        if water_detected:
-            status = "CRITIQUE : EAU PRÉSENTE"
-            advice = "STOP ! Phase aqueuse détectée au fond de l'échantillon. Purge de cuve indispensable."
-        elif turbidity > 45:
-            status = "ALERTE : TURBIDITÉ ÉLEVÉE"
-            advice = "Attention : Carburant trouble (émulsion possible). Vérifiez l'étanchéité et les filtres."
-        else:
-            status = "CARBURANT CONFORME"
-            advice = "Pureté optimale détectée. Pas d'anomalie visible."
-
-        return {
-            "status": status,
-            "turbidity": turbidity,
-            "water_present": water_detected,
-            "recommendation": advice
-        }
+    def _parse_json_response(self, text):
+        import json
+        # Nettoie les balises markdown si présentes
+        clean_text = text.replace('```json', '').replace('```', '').strip()
+        return json.loads(clean_text)

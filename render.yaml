@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: gen-pure-omega
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: SECRET_KEY
+        generateValue: true # Génère une clé unique automatiquement
+      - key: ALGORITHM
+        value: HS256
+      - key: ADMIN_EMAIL
+        value: idriss.general@email.com # À MODIFIER

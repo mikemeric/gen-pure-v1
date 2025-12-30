@@ -1,17 +1,27 @@
-FROM python:3.9-slim
+# Image de base légère
+FROM python:3.10-slim
 
-# On définit le dossier de travail
+# Répertoire de travail
 WORKDIR /app
 
-# On installe les dépendances système pour PostgreSQL (souvent nécessaire pour psycopg2)
-RUN apt-get update && apt-get install -y libpq-dev gcc && rm -rf /var/lib/apt/lists/*
+# Installation des dépendances système (pour PDF et Images)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# On copie tout le dossier (y compris api/, core/, etc.)
-COPY . .
-
-# On installe les librairies Python
+# Copie des munitions
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# La commande de démarrage spécifique à FastAPI sur Render
-# Render fournit le port via la variable d'environnement $PORT
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+# Copie du code source
+COPY . .
+
+# Création des zones de mémoire
+RUN mkdir -p static/reports data
+
+# Port d'écoute
+EXPOSE 10000
+
+# Lancement du QG
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]

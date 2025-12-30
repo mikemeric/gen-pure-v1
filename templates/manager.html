@@ -3,237 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEN-PURE | Bio-Intelligence Fleet</title>
+    <title>GEN-PURE | POSTE DE COMMANDEMENT OMEGA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .glass { background: rgba(7, 8, 18, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .tab-content { display: none; animation: slideUp 0.4s ease-out; }
-        .tab-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .active-menu { background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%); border-left: 4px solid #3b82f6; color: #3b82f6; }
-        .fuel-gradient { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); }
+        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        #map { height: 450px; border-radius: 2rem; border: 1px solid rgba(59, 130, 246, 0.2); z-index: 10; }
+        .vision-btn { display: none; transition: all 0.3s ease; }
     </style>
 </head>
-<body class="bg-[#05060f] text-slate-300 font-sans min-h-screen flex flex-col">
+<body class="bg-[#020617] text-slate-100 font-sans antialiased overflow-x-hidden">
 
-    <header class="h-16 glass flex items-center justify-between px-10 border-b border-slate-800">
-        <div class="flex items-center gap-6">
-            <h1 class="text-2xl font-black text-white tracking-tighter italic">GEN-PURE <span class="text-blue-500 font-light">FLEET+</span></h1>
-            <nav class="hidden md:flex gap-8 ml-10">
-                <button onclick="showTab('dashboard')" class="text-xs font-bold uppercase tracking-widest hover:text-blue-400 transition">Dashboard</button>
-                <button onclick="showTab('stations')" class="text-xs font-bold uppercase tracking-widest hover:text-blue-400 transition">Geo-Analyse</button>
-                <button onclick="showTab('fleet')" class="text-xs font-bold uppercase tracking-widest hover:text-blue-400 transition">Santé Bio-Mécanique</button>
+    <div class="flex h-screen">
+        <aside class="w-64 glass border-r border-white/5 p-6 hidden lg:flex flex-col">
+            <div class="mb-10 text-center">
+                <h1 class="text-xl font-black italic text-blue-500 uppercase tracking-tighter">GEN-PURE OMEGA</h1>
+                <p class="text-[9px] text-slate-500 tracking-widest uppercase mt-1">Haut Commandement</p>
+            </div>
+            <nav class="space-y-2 flex-1">
+                <a href="/manager" class="flex items-center space-x-3 text-blue-400 bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
+                    <i class="fas fa-satellite-dish"></i><span class="font-bold">Dashboard</span>
+                </a>
+                <a href="/scan" class="flex items-center space-x-3 text-slate-400 hover:text-white p-3 rounded-xl hover:bg-white/5 transition-all">
+                    <i class="fas fa-barcode"></i><span>Unité de Scan</span>
+                </a>
             </nav>
-        </div>
-        <div class="flex items-center gap-4 bg-slate-900/50 px-4 py-1.5 rounded-full border border-slate-800">
-            <span class="text-[10px] font-bold text-emerald-500 uppercase">Live Data</span>
-            <div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
-        </div>
-    </header>
+        </aside>
 
-    <main class="flex-1 p-8">
-        
-        <div id="fleet" class="tab-content active space-y-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 class="text-3xl font-black text-white uppercase italic">Analyse d'Intégrité Flotte</h2>
-                    <p class="text-slate-500">Corrélation entre qualité du carburant et usure des équipements.</p>
+        <main class="flex-1 overflow-y-auto p-4 lg:p-8">
+            
+            <div id="vision-bar" class="vision-btn mb-6 glass p-4 rounded-2xl border border-blue-500/50 flex justify-between items-center bg-blue-600/10">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-eye text-blue-500 text-xl animate-pulse"></i>
+                    <div>
+                        <h4 class="text-xs font-black uppercase">Mode Vision Activé</h4>
+                        <p class="text-[10px] text-slate-400">2 rapports sélectionnés pour analyse comparative.</p>
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <button class="bg-blue-600/10 text-blue-400 border border-blue-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-600 transition hover:text-white">Simuler Contamination</button>
-                </div>
+                <button onclick="launchVision()" class="bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black px-6 py-2 rounded-xl transition-all uppercase">
+                    Lancer Comparaison
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass p-6 rounded-[2rem] space-y-6 relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4">
-                            <span class="bg-red-500/20 text-red-500 text-[10px] px-3 py-1 rounded-full font-bold border border-red-500/30">RISQUE ÉLEVÉ</span>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800">
-                                <i class="ph ph-truck text-3xl text-blue-500"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-bold text-white">Camion Citerne #CC-042</h4>
-                                <p class="text-xs text-slate-500 font-mono italic">Localisation: Yaoundé Nord</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="flex justify-between text-xs">
-                                <span class="text-slate-500 uppercase font-bold tracking-widest text-[9px]">Taux Contamination Carburant</span>
-                                <span class="text-red-400 font-bold">18.5% (Max 5%)</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="bg-gradient-to-r from-emerald-500 via-orange-500 to-red-500 h-full" style="width: 85%"></div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800">
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase mb-1">Injecteurs</p>
-                                <p class="text-sm font-bold text-orange-400 italic">Encrassés</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase mb-1">Filtre</p>
-                                <p class="text-sm font-bold text-red-500 italic text-[10px]">Changement Immédiat</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase mb-1">Rendement</p>
-                                <p class="text-sm font-bold text-blue-400">-12%</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass p-6 rounded-[2rem] space-y-6 relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4">
-                            <span class="bg-emerald-500/20 text-emerald-500 text-[10px] px-3 py-1 rounded-full font-bold border border-emerald-500/30">SAIN</span>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800">
-                                <i class="ph ph-engine text-3xl text-emerald-500"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-lg font-bold text-white">Générateur G-09</h4>
-                                <p class="text-xs text-slate-500 font-mono italic">Localisation: Station Littoral</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="flex justify-between text-xs">
-                                <span class="text-slate-500 uppercase font-bold tracking-widest text-[9px]">Taux Contamination Carburant</span>
-                                <span class="text-emerald-400 font-bold">0.8% (Pur)</span>
-                            </div>
-                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                                <div class="bg-emerald-500 h-full" style="width: 15%"></div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800">
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase mb-1">Injecteurs</p>
-                                <p class="text-sm font-bold text-emerald-400 italic">Optimum</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase mb-1">Filtre</p>
-                                <p class="text-sm font-bold text-emerald-400 italic text-[10px]">OK (80% vie)</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase mb-1">Rendement</p>
-                                <p class="text-sm font-bold text-blue-400">100%</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass p-8 rounded-[2.5rem] flex flex-col items-center">
-                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-widest mb-6">Matrice de Dégradation</h3>
-                    <div class="relative h-64 w-full">
-                        <canvas id="correlationChart"></canvas>
-                    </div>
-                    <div class="mt-8 text-center space-y-2">
-                        <p class="text-[10px] text-slate-500 uppercase">Analyse IA</p>
-                        <p class="text-xs text-slate-300 px-4">"Une augmentation de 2% de contamination soufrée réduit la durée de vie des filtres de 40% sur ce modèle."</p>
-                    </div>
-                </div>
-
+            <div class="glass p-2 rounded-[2rem] mb-8">
+                <div id="map"></div>
             </div>
 
-            <div class="glass rounded-[2rem] overflow-hidden">
-                <div class="px-8 py-6 flex justify-between items-center border-b border-slate-800">
-                    <h3 class="text-xl font-bold italic text-white">Inventaire Santé Bio-Mécanique</h3>
-                    <i class="ph ph-export text-blue-400 cursor-pointer"></i>
+            <div class="glass rounded-3xl overflow-hidden mb-10">
+                <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-blue-400">Registre de Flotte</h3>
+                    <span class="text-[9px] text-slate-500">SÉLECTIONNEZ 2 RAPPORTS POUR COMPARER</span>
                 </div>
-                <table class="w-full text-left">
-                    <thead class="bg-slate-900/30 text-[10px] uppercase font-bold text-slate-500">
-                        <tr>
-                            <th class="px-8 py-4">Équipement</th>
-                            <th>Dernier Scan Carburant</th>
-                            <th>Score Contamination</th>
-                            <th>Santé Moteur</th>
-                            <th class="text-right px-8">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800">
-                        <tr class="hover:bg-blue-900/10 transition-all group">
-                            <td class="px-8 py-5">
-                                <p class="font-bold text-slate-200">Pompe Station-P1</p>
-                                <p class="text-[9px] text-slate-500">S/N: 2025-X01</p>
-                            </td>
-                            <td><span class="text-xs italic">Aujourd'hui, 14:20</span></td>
-                            <td><span class="text-emerald-400 font-bold">1.2%</span></td>
-                            <td>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex gap-0.5">
-                                        <div class="w-1.5 h-3 bg-emerald-500 rounded-full"></div>
-                                        <div class="w-1.5 h-3 bg-emerald-500 rounded-full"></div>
-                                        <div class="w-1.5 h-3 bg-emerald-500 rounded-full"></div>
-                                        <div class="w-1.5 h-3 bg-slate-700 rounded-full"></div>
-                                    </div>
-                                    <span class="text-[10px] font-bold">BON</span>
-                                </div>
-                            </td>
-                            <td class="text-right px-8"><button class="text-blue-500 text-xs font-bold hover:underline">Diagnostics</button></td>
-                        </tr>
-                        <tr class="hover:bg-red-900/10 transition-all group">
-                            <td class="px-8 py-5">
-                                <p class="font-bold text-slate-200">Injecteur Principal G3</p>
-                                <p class="text-[9px] text-slate-500">S/N: 2025-X44</p>
-                            </td>
-                            <td><span class="text-xs italic">Il y a 2 jours</span></td>
-                            <td><span class="text-red-400 font-bold">24.8%</span></td>
-                            <td>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex gap-0.5">
-                                        <div class="w-1.5 h-3 bg-red-500 rounded-full"></div>
-                                        <div class="w-1.5 h-3 bg-slate-700 rounded-full"></div>
-                                        <div class="w-1.5 h-3 bg-slate-700 rounded-full"></div>
-                                        <div class="w-1.5 h-3 bg-slate-700 rounded-full"></div>
-                                    </div>
-                                    <span class="text-[10px] font-bold text-red-500 tracking-tighter">CRITIQUE</span>
-                                </div>
-                            </td>
-                            <td class="text-right px-8"><button class="bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold">ARRÊT URGENCE</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm" id="scans-table">
+                        <thead class="bg-white/5 text-[10px] text-slate-500 uppercase">
+                            <tr>
+                                <th class="p-4 w-10">Vision</th>
+                                <th class="p-4">ID Rapport</th>
+                                <th class="p-4">Station</th>
+                                <th class="p-4">Verdict</th>
+                                <th class="p-4">Date</th>
+                                <th class="p-4">PDF</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for point in map_points %}
+                            <tr class="hover:bg-white/5 transition-all">
+                                <td class="p-4">
+                                    <input type="checkbox" value="{{ point.report_id }}" onchange="handleSelection(this)" 
+                                           class="w-4 h-4 rounded border-white/10 bg-slate-900 checked:bg-blue-600 focus:ring-blue-500 transition-all cursor-pointer">
+                                </td>
+                                <td class="p-4 font-mono text-blue-500 text-xs">#{{ point.report_id }}</td>
+                                <td class="p-4 font-bold">{{ point.station }}</td>
+                                <td class="p-4">
+                                    <span class="px-3 py-1 rounded-full text-[9px] font-black 
+                                        {% if point.risk == 'DANGER' %} bg-red-600 {% elif point.risk == 'VIGILANCE' %} bg-orange-600 {% else %} bg-emerald-600 {% endif %}">
+                                        {{ point.status }}
+                                    </span>
+                                </td>
+                                <td class="p-4 text-slate-400 text-xs">{{ point.timestamp }}</td>
+                                <td class="p-4">
+                                    <a href="/static/reports/CERT-{{ point.report_id }}.pdf" target="_blank" class="text-slate-500 hover:text-white">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-
-    </main>
+        </main>
+    </div>
 
     <script>
-        function showTab(id) {
-            // Logique simple pour basculer (Ici focalisé sur Flotte)
-            alert("Accès au module : " + id);
+        let selectedScans = [];
+
+        function handleSelection(checkbox) {
+            if (checkbox.checked) {
+                if (selectedScans.length >= 2) {
+                    checkbox.checked = false;
+                    alert("Mon Général, l'Agent VISION ne peut comparer que 2 rapports à la fois.");
+                    return;
+                }
+                selectedScans.push(checkbox.value);
+            } else {
+                selectedScans = selectedScans.filter(id => id !== checkbox.value);
+            }
+
+            // Affichage dynamique de la barre VISION
+            const visionBar = document.getElementById('vision-bar');
+            visionBar.style.display = (selectedScans.length === 2) ? 'flex' : 'none';
         }
 
-        const ctxCor = document.getElementById('correlationChart').getContext('2d');
-        new Chart(ctxCor, {
-            type: 'scatter',
-            data: {
-                datasets: [{
-                    label: 'Impact Carburant/Moteur',
-                    data: [
-                        {x: 1, y: 95}, {x: 5, y: 88}, {x: 10, y: 75}, 
-                        {x: 15, y: 60}, {x: 20, y: 40}, {x: 25, y: 20}
-                    ],
-                    backgroundColor: '#3b82f6'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { title: { display: true, text: 'Taux Contamination (%)', color: '#64748b' }, grid: { display: false } },
-                    y: { title: { display: true, text: 'Santé Moteur (%)', color: '#64748b' }, grid: { color: '#1e293b' } }
-                },
-                plugins: { legend: { display: false } }
+        function launchVision() {
+            if (selectedScans.length === 2) {
+                window.location.href = `/manager/compare?id1=${selectedScans[0]}&id2=${selectedScans[1]}`;
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var map = L.map('map', { zoomControl: false }).setView([4.05, 9.7], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+            const mapData = JSON.parse('{{ map_points | tojson | safe }}' || '[]');
+            mapData.forEach(point => {
+                const color = point.risk === 'DANGER' ? '#ef4444' : (point.risk === 'VIGILANCE' ? '#f97316' : '#10b981');
+                L.circleMarker([4.05 + (Math.random() - 0.5) * 0.1, 9.7 + (Math.random() - 0.5) * 0.1], {
+                    radius: 8, fillColor: color, color: "#fff", weight: 2, fillOpacity: 0.9
+                }).addTo(map).bindPopup(`<b>${point.station}</b><br>ID: ${point.report_id}`);
+            });
         });
     </script>
 </body>
