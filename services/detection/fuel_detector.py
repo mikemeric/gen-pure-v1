@@ -5,58 +5,65 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 
 class GlobalIntelligenceUnit:
+    """Agent SENTINELLE V4.2 : Patch Typage Strict"""
+
     def __init__(self):
         self.model_path = "data/omega_model.pkl"
-        self.model = self._load()
+        self.model = self._load_model()
 
-    def _load(self):
+    def _load_model(self):
         if os.path.exists(self.model_path):
             with open(self.model_path, 'rb') as f: return pickle.load(f)
         return RandomForestClassifier(n_estimators=100)
 
     def _analyze_physics(self, img):
-        # 1. Analyse EAU (Séparation de phase bas de tube)
+        """Analyse physique avec conversion stricte des types (Fix Crash JSON)"""
         h, w, _ = img.shape
-        bottom = img[int(h*0.85):, :] # Fond du tube
-        top = img[int(h*0.2):int(h*0.6), :] # Milieu du tube
+        bottom = img[int(h*0.85):, :] 
+        top = img[int(h*0.2):int(h*0.6), :] 
         
-        # Si le fond est beaucoup plus clair/foncé que le milieu -> Eau
-        water_risk = abs(np.mean(bottom) - np.mean(top)) > 40
+        # --- CORRECTION SENTINELLE : Conversion explicite en bool() python natif ---
+        # L'erreur venait d'ici : 'numpy.bool_' n'est pas sérialisable
+        diff_val = abs(np.mean(bottom) - np.mean(top))
+        water_risk = bool(diff_val > 40) 
         
-        # 2. Analyse SÉDIMENTS (Impuretés solides)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(gray, 100, 200)
-        impurities = np.count_nonzero(edges)
         
-        # 3. Analyse TURBIDITÉ (Trouble)
-        turbidity = gray.std()
+        # --- CORRECTION SENTINELLE : Conversion explicite en int() et float() ---
+        impurities = int(np.count_nonzero(edges))
+        turbidity = float(gray.std())
         
-        return {"water": water_risk, "sediments": impurities, "turbidity": turbidity, "avg_color": cv2.mean(img)[:3]}
+        # On renvoie des types Python purs que le serveur comprendra
+        return {
+            "water": water_risk, 
+            "sediments": impurities, 
+            "turbidity": turbidity, 
+            "avg_color": [float(c) for c in cv2.mean(img)[:3]] 
+        }
 
     async def analyze_with_turbo_mode(self, img_bytes, station):
         nparr = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        if img is None: return {"risk_level": "REJET", "diagnostic": "Image noire/invalide"}
+        if img is None: 
+            return {"risk_level": "REJET", "diagnostic": "Image noire/invalide"}
 
         img_std = cv2.resize(img, (200, 300))
         phys = self._analyze_physics(img_std)
 
-        # LOGIQUE MÉTIER CAMEROUN (Zoa-Zoa vs Bon Gasoil)
+        # LOGIQUE MÉTIER
         verdict = []
         risk_score = 0
         
-        # Critère 1 : Eau (Mortel pour injecteurs)
         if phys['water']:
             verdict.append("EAU DÉTECTÉE (Séparation Phase)")
             risk_score += 60
             
-        # Critère 2 : Sédiments (Bouche les filtres)
         if phys['sediments'] > 2000:
             verdict.append(f"SÉDIMENTS CRITIQUES ({phys['sediments']} ppm)")
             risk_score += 30
             
-        # Critère 3 : Turbidité (Mélange pétrole lampant/eau)
-        if phys['turbidity'] < 15: # Trop "plat" visuellement
+        if phys['turbidity'] < 15:
             verdict.append("OPACITÉ SUSPECTE (Mélange ?)")
             risk_score += 20
 
@@ -66,8 +73,14 @@ class GlobalIntelligenceUnit:
         
         diag_text = " // ".join(verdict) if verdict else "Carburant conforme. Pas d'anomalie visible."
 
-        # Extraction features pour ML
-        features = [*phys['avg_color'], phys['turbidity'], float(phys['sediments'])]
+        # Conversion finale de la liste features pour ML (Liste de floats purs)
+        features = [
+            phys['avg_color'][0], 
+            phys['avg_color'][1], 
+            phys['avg_color'][2], 
+            phys['turbidity'], 
+            float(phys['sediments'])
+        ]
 
         return {
             "risk_level": final_risk,
@@ -79,9 +92,17 @@ class GlobalIntelligenceUnit:
         }
 
     def train_model(self, data):
-        # Apprentissage sur les corrections manuelles (vrai ML)
-        X = [d['features'] for d in data if 'features' in d and 'manual_validation' in d]
-        y = [1 if d['manual_validation'] != 'NORMAL' else 0 for d in data if 'features' in d and 'manual_validation' in d]
+        X = []
+        y = []
+        for d in data:
+            if 'features' in d and 'manual_validation' in d:
+                try:
+                    # Sécurisation des données entrantes pour l'apprentissage
+                    feat = [float(x) for x in d['features']]
+                    label = 1 if d['manual_validation'] != 'NORMAL' else 0
+                    X.append(feat)
+                    y.append(label)
+                except: continue
         
         if len(y) >= 5:
             self.model.fit(X, y)
