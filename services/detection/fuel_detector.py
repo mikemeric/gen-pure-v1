@@ -5,55 +5,63 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 
 class GlobalIntelligenceUnit:
-    """Agent SENTINELLE V6.0 : Algorithme 'Bunker' Anti-Faux Positifs"""
+    """Agent SENTINELLE V7.0 : Algorithme Mathématique Anti-Humain"""
 
     def __init__(self):
         self.model_path = "data/omega_model.pkl"
         self.model = self._load_model()
-        # Chargement du détecteur de visage ultra-rapide
-        self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        # On supprime la dépendance Haarcascade (trop fragile sur Render)
 
     def _load_model(self):
         if os.path.exists(self.model_path):
             with open(self.model_path, 'rb') as f: return pickle.load(f)
         return RandomForestClassifier(n_estimators=100)
 
+    def _detect_skin(self, img):
+        """Détecte la présence de peau humaine via analyse spectrale HSV"""
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        
+        # Plage de couleur de peau générique (Teinte basse, Saturation moyenne)
+        lower_skin = np.array([0, 20, 70], dtype=np.uint8)
+        upper_skin = np.array([20, 255, 255], dtype=np.uint8)
+        
+        mask = cv2.inRange(hsv, lower_skin, upper_skin)
+        skin_pixels = np.count_nonzero(mask)
+        total_pixels = img.shape[0] * img.shape[1]
+        
+        ratio = (skin_pixels / total_pixels) * 100
+        # Si plus de 15% de l'image ressemble à de la peau -> REJET
+        return ratio > 15
+
     def _calculate_entropy(self, img_gray):
-        """Calcule la 'complexité' de l'image.
-        Liquide = Entropie faible.
-        Visage/Décor = Entropie élevée.
-        """
+        """Mesure le désordre. Liquide = Faible. Visage = Élevé."""
         hist = cv2.calcHist([img_gray], [0], None, [256], [0, 256])
         hist = hist / hist.sum()
         non_zero_hist = hist[hist > 0]
         entropy = -np.sum(non_zero_hist * np.log2(non_zero_hist))
-        return entropy
+        return float(entropy)
 
     def _firewall_check(self, img, gray):
-        """LE PARE-FEU : Bloque tout ce qui n'est pas du liquide propre"""
+        """LE PARE-FEU : Bloque tout ce qui n'est pas du liquide pur"""
         
-        # 1. DÉTECTION VISAGE (Sécurité Biométrique)
-        faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4)
-        if len(faces) > 0:
-            return False, "VISAGE DÉTECTÉ : Veuillez photographier uniquement l'éprouvette."
+        # 1. DÉTECTION DE PEAU (Remplace la détection faciale)
+        if self._detect_skin(img):
+            return False, "OBJET NON CONFORME : Peau ou main détectée. Cadrez l'éprouvette."
 
         # 2. ANALYSE D'ENTROPIE (Texture)
-        # Un liquide est 'lisse'. Un visage ou un arrière-plan est 'complexe'.
+        # Seuil abaissé à 5.0 pour être très strict
         entropy = self._calculate_entropy(gray)
-        # Seuil empirique : au-dessus de 5.5, c'est trop complexe pour être juste du liquide
-        if entropy > 5.5:
-            return False, "ENVIRONNEMENT TROP COMPLEXE : Cadrage incorrect (trop de détails d'arrière-plan)."
+        if entropy > 5.0:
+            return False, "ENVIRONNEMENT TROP COMPLEXE : Trop de détails (visage/fond)."
 
-        # 3. VARIANCE DE COULEUR (Uniformité)
-        # Le carburant est monochrome (Jaune ou Orange).
-        # Si l'écart-type (std) est élevé, il y a trop de couleurs différentes (ex: peau + mur + t-shirt)
+        # 3. VARIANCE DE COULEUR (Le gasoil est uniforme)
         color_variance = np.std(img)
-        if color_variance > 60: 
-            return False, "COULEURS HÉTÉROGÈNES : L'image contient trop d'objets différents."
+        if color_variance > 55: 
+            return False, "COULEURS HÉTÉROGÈNES : L'image n'est pas uniforme."
 
-        # 4. LUMINOSITÉ (Noir total)
+        # 4. LUMINOSITÉ
         if np.mean(gray) < 30:
-            return False, "ÉCLAIRAGE INSUFFISANT : Image trop sombre."
+            return False, "IMAGE TROP SOMBRE."
 
         return True, "OK"
 
@@ -63,15 +71,15 @@ class GlobalIntelligenceUnit:
         bottom = img[int(h*0.80):, :] 
         top = img[int(h*0.2):int(h*0.6), :] 
         
-        # EAU (Différence bas/haut)
+        # EAU
         diff_val = abs(np.mean(bottom) - np.mean(top))
-        water_risk = bool(diff_val > 35) # Seuil resserré
+        water_risk = bool(diff_val > 35)
         
-        # SÉDIMENTS (Contours)
+        # SÉDIMENTS
         edges = cv2.Canny(gray, 100, 200)
         impurities = int(np.count_nonzero(edges))
         
-        # TURBIDITÉ (Flou interne)
+        # TURBIDITÉ
         turbidity = float(gray.std())
         
         return {
@@ -86,9 +94,9 @@ class GlobalIntelligenceUnit:
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         
         if img is None: 
-            return {"risk_level": "REJET", "diagnostic": "Fichier corrompu"}
+            return {"risk_level": "REJET", "diagnostic": "Fichier illisible"}
 
-        # Redimensionnement (Optimisation Render RAM + Détection)
+        # Redimensionnement (Optimisation Render RAM)
         img_std = cv2.resize(img, (300, 400))
         gray = cv2.cvtColor(img_std, cv2.COLOR_BGR2GRAY)
 
@@ -96,14 +104,13 @@ class GlobalIntelligenceUnit:
         is_valid, reason = self._firewall_check(img_std, gray)
         
         if not is_valid:
-            # ARRÊT IMMÉDIAT DU PROCESSUS
-            # On renvoie un objet REJET propre
+            # REJET SYSTÉMATIQUE ET DÉFINITIF
             return {
-                "risk_level": "REJET",  # Déclenche l'icône TRIANGLE JAUNE dans scan.html
-                "turbidity": 0.0, 
-                "water_presence": False, 
-                "impurities": 0,
-                "diagnostic": reason, # Ex: "VISAGE DÉTECTÉ"
+                "risk_level": "REJET",  # C'est ce mot-clé exact que le frontend attend
+                "turbidity": 999.9,     # Valeur aberrante pour forcer l'alerte
+                "water_presence": True, 
+                "impurities": 9999,
+                "diagnostic": reason,   # Ex: "OBJET NON CONFORME..."
                 "features": [0.0, 0.0, 0.0, 0.0, 0.0]
             }
 
@@ -142,5 +149,5 @@ class GlobalIntelligenceUnit:
         }
     
     def train_model(self, data):
-        # ... (Code existant inchangé)
         pass
+        
