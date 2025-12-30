@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class MemoryUnit:
-    """Agent ARCHIVISTE V3.4 : Gestion de la persistance SaaS et CRUD complet"""
+    """Agent ARCHIVISTE V3.5 : Version Fusionnée Intégrale & Blindée pour Render"""
 
     def __init__(self):
         self.base_dir = "data"
@@ -33,13 +33,16 @@ class MemoryUnit:
         # Création du SuperAdmin fondateur si la base est vide
         users = self.get_users()
         if not any(u.get('role') == 'SUPERADMIN' for u in users):
+            # Utilisation de la méthode interne blindée
             self.create_user("Idriss", "OMEGA123", "SUPERADMIN", "GEN-PURE-HQ")
 
     # --- GESTION DES UTILISATEURS ---
 
     def get_users(self):
-        with open(self.paths["users"], 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(self.paths["users"], 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except: return []
 
     def get_company_drivers(self, company_id):
         """Filtre les chauffeurs pour le Manager d'une entreprise spécifique"""
@@ -47,12 +50,15 @@ class MemoryUnit:
         return [u for u in users if u.get('company_id') == company_id and u.get('role') == 'DRIVER']
 
     def create_user(self, username, password, role, company_id):
-        """Crée un utilisateur avec mot de passe haché"""
+        """Crée un utilisateur avec mot de passe haché (Blindé contre ValueError)"""
         users = self.get_users()
         if any(u['username'] == username for u in users):
             return False
         
-        hashed_pw = pwd_context.hash(password)
+        # FIX BCRYPT : Tronquage à 72 octets obligatoire pour Bcrypt
+        safe_password = password[:72]
+        hashed_pw = pwd_context.hash(safe_password)
+        
         new_user = {
             "id": str(uuid.uuid4()),
             "username": username,
@@ -67,15 +73,20 @@ class MemoryUnit:
         return True
 
     def verify_user(self, username, password):
-        """Vérifie les identifiants lors du login"""
+        """Vérifie les identifiants lors du login (Blindé)"""
         users = self.get_users()
         for u in users:
-            if u['username'] == username and pwd_context.verify(password, u['password_hash']):
-                return u
+            if u['username'] == username:
+                try:
+                    # On vérifie avec le mot de passe tronqué comme à la création
+                    if pwd_context.verify(password[:72], u['password_hash']):
+                        return u
+                except Exception:
+                    continue
         return None
 
     def delete_user(self, username, company_id):
-        """Suppression sécurisée : un manager ne peut supprimer que ses propres chauffeurs"""
+        """Suppression sécurisée par le Manager"""
         users = self.get_users()
         new_list = [u for u in users if not (u['username'] == username and u['company_id'] == company_id)]
         if len(users) != len(new_list):
