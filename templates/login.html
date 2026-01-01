@@ -2,63 +2,67 @@
 <html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEN-PURE | AUTHENTIFICATION OMEGA</title>
+    <title>CONNEXION | GEN-PURE OMEGA.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .bg-gradient-omega { background: radial-gradient(circle at top right, #1e3a8a, #020617); }
-        .input-glow:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        body { background: #020617; background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="bg-gradient-omega h-screen flex items-center justify-center p-4 overflow-hidden">
+<body class="h-screen flex items-center justify-center text-white font-sans p-4">
 
-    <div class="w-full max-w-md animate-in fade-in zoom-in duration-500">
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-3xl shadow-2xl shadow-blue-500/20 mb-4 transform -rotate-12">
-                <i class="fas fa-droplet text-white text-4xl"></i>
+    <div class="glass p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl shadow-blue-900/20 relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-500 rounded-full blur-[80px] opacity-20"></div>
+        <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-indigo-500 rounded-full blur-[80px] opacity-20"></div>
+
+        <div class="text-center mb-10">
+            <div class="inline-block relative mb-4">
+                <i class="fas fa-tint text-6xl text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"></i>
+                <i class="fas fa-circle-check absolute -bottom-1 -right-1 text-emerald-400 bg-black rounded-full text-xl border-2 border-black"></i>
             </div>
-            <h1 class="text-3xl font-black text-white italic tracking-tighter uppercase">GEN-PURE <span class="text-blue-500">OMEGA</span></h1>
-            <p class="text-[10px] text-slate-500 font-bold tracking-[0.4em] mt-2">UNITÉ DE CONTRÔLE STRATÉGIQUE</p>
+            <h1 class="text-3xl font-black italic uppercase tracking-tighter">
+                GEN-PURE <span class="text-blue-500">OMEGA</span><span class="text-blue-500 text-4xl">.</span>
+            </h1>
+            <p class="text-[10px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-2">by DI-SOLUTIONS.</p>
         </div>
 
-        <div class="glass p-8 md:p-10 rounded-[3rem] shadow-2xl">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-white font-bold text-lg uppercase tracking-widest">Identification</h2>
-                <i class="fas fa-shield-halved text-blue-500 animate-pulse"></i>
-            </div>
-
+        <form action="/login" method="POST" class="space-y-4 relative z-10">
             {% if error %}
-            <div class="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black p-3 rounded-xl mb-6 text-center uppercase">
-                <i class="fas fa-triangle-exclamation mr-2"></i> {{ error }}
+            <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-xl text-xs font-bold text-center animate-pulse">
+                <i class="fas fa-triangle-exclamation mr-1"></i> {{ error }}
             </div>
             {% endif %}
 
-            <form action="/login" method="post" class="space-y-6">
-                <div class="relative group">
-                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
-                    <input type="text" name="username" placeholder="Identifiant État-Major" required
-                           class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white text-sm outline-none transition-all input-glow">
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-500 ml-3">Identifiant</label>
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-4 text-slate-500"></i>
+                    <input name="username" type="text" placeholder="Ex: Idriss" required 
+                           class="w-full bg-slate-900/50 p-3 pl-10 rounded-2xl border border-white/10 outline-none focus:border-blue-500 focus:bg-slate-900 transition-all font-bold text-white placeholder-slate-600">
                 </div>
+            </div>
 
-                <div class="relative group">
-                    <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
-                    <input type="password" name="password" placeholder="Code d'Accès" required
-                           class="w-full bg-slate-950/50 border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-white text-sm outline-none transition-all input-glow">
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-500 ml-3">Code d'accès</label>
+                <div class="relative">
+                    <i class="fas fa-key absolute left-4 top-4 text-slate-500"></i>
+                    <input name="password" type="password" placeholder="••••••" required 
+                           class="w-full bg-slate-900/50 p-3 pl-10 rounded-2xl border border-white/10 outline-none focus:border-blue-500 focus:bg-slate-900 transition-all font-bold text-white placeholder-slate-600">
                 </div>
+            </div>
 
-                <button type="submit" 
-                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest text-xs">
-                    Initialiser la Session
-                </button>
-            </form>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-600/20 transition-all mt-4 transform active:scale-95">
+                Entrer dans le système
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-[9px] text-slate-600">
+                &copy; 2026 GEN-PURE OMEGA.<br>
+                Système protégé par chiffrement PBKDF2
+            </p>
         </div>
-
-        <p class="text-center text-slate-600 text-[9px] mt-8 uppercase tracking-[0.2em]">
-            © 2024 GEN-PURE | Phase 4 : Protocole Gardien Actif
-        </p>
     </div>
-
 </body>
 </html>

@@ -3,182 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SCANNER OMEGA CMR</title>
+    <title>SCANNER | GEN-PURE OMEGA.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Styles spécifiques Mobile */
         .glass { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        #video-container { position: relative; height: 350px; border-radius: 1.5rem; overflow: hidden; border: 2px solid #3b82f6; }
-        #video-preview { width: 100%; height: 100%; object-fit: cover; }
+        
+        #video-container { 
+            position: relative; 
+            height: 350px; 
+            border-radius: 1.5rem; 
+            overflow: hidden; 
+            border: 2px solid #3b82f6; 
+            background: #000;
+        }
+        
+        #video-preview { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+        
+        /* Guide de visée pour l'utilisateur */
         .guide-box { 
             position: absolute; top: 15%; bottom: 15%; left: 25%; right: 25%; 
             border: 2px dashed rgba(255,255,255,0.6); border-radius: 10px; 
             box-shadow: 0 0 0 999px rgba(0,0,0,0.6); 
+            z-index: 10;
         }
     </style>
 </head>
 <body class="bg-slate-950 text-white font-sans h-screen flex flex-col">
 
-    <header class="p-4 flex justify-between items-center bg-slate-900 border-b border-white/10">
-        <div>
-            <h1 class="text-sm font-black italic uppercase">GEN-PURE <span class="text-blue-500">CMR</span></h1>
-            <p id="gps-stat" class="text-[9px] text-slate-400">GPS: Recherche...</p>
+    <header class="p-4 flex justify-between items-center bg-slate-900 border-b border-white/10 shrink-0">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-tint text-xl text-blue-500 drop-shadow-[0_0_5px_rgba(59,130,246,0.8)]"></i>
+            <div>
+                <h1 class="text-sm font-black italic uppercase tracking-tighter leading-none">
+                    GEN-PURE <span class="text-blue-500">OMEGA</span><span class="text-blue-500 text-lg">.</span>
+                </h1>
+                <p id="gps-stat" class="text-[9px] text-slate-400 tracking-wider flex items-center gap-1">
+                    <i class="fas fa-satellite-dish animate-pulse"></i> GPS: Recherche...
+                </p>
+            </div>
         </div>
-        <a href="/manager" class="text-[9px] bg-white/10 px-3 py-2 rounded font-bold">DASHBOARD</a>
+        <a href="/logout" class="text-[9px] bg-white/5 px-3 py-2 rounded-lg font-bold border border-white/10 text-slate-400 hover:text-white transition-colors">SORTIE</a>
     </header>
 
     <main class="flex-1 overflow-y-auto p-4 space-y-4">
         
         <div id="video-container">
-            <video id="video-preview" autoplay playsinline></video>
+            <video id="video-preview" autoplay playsinline muted></video>
             <div class="guide-box">
-                <div class="absolute bottom-4 left-0 w-full text-center text-[8px] font-bold text-red-500 bg-black/50">ZONE EAU / DÉPÔT</div>
+                <div class="absolute bottom-4 left-0 w-full text-center text-[8px] font-bold text-red-500 bg-black/50 py-1">
+                    ZONE EAU / DÉPÔT
+                </div>
             </div>
         </div>
 
-        <div class="bg-slate-900 p-4 rounded-2xl space-y-3 border border-white/10">
+        <div class="bg-slate-900 p-4 rounded-2xl space-y-3 border border-white/10 shadow-xl">
             <div>
-                <label class="text-[9px] font-black text-slate-500 uppercase">Matériel à protéger</label>
-                <select id="cat" class="w-full bg-slate-800 p-3 rounded-xl text-xs font-bold border border-white/10">
-                    <option value="CAMION">CAMION / POIDS LOURD</option>
-                    <option value="GE">GROUPE ÉLECTROGÈNE</option>
-                    <option value="STATION">CUVE STOCKAGE</option>
-                </select>
+                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Matériel</label>
+                <div class="relative mt-1">
+                    <i class="fas fa-cogs absolute left-3 top-3 text-slate-500 text-xs"></i>
+                    <select id="cat" class="w-full bg-slate-800 p-3 pl-8 rounded-xl text-xs font-bold border border-white/10 text-white outline-none focus:border-blue-500">
+                        <option value="CAMION">CAMION / POIDS LOURD</option>
+                        <option value="GE">GROUPE ÉLECTROGÈNE</option>
+                        <option value="STATION">CUVE STOCKAGE</option>
+                    </select>
+                </div>
             </div>
+
             <div>
-                <label class="text-[9px] font-black text-slate-500 uppercase">Origine Carburant</label>
-                <select id="preset" onchange="toggleMan()" class="w-full bg-slate-800 p-3 rounded-xl text-xs font-bold border border-white/10">
-                    <optgroup label="DOUALA">
-                        <option value="TOTAL-BONABERI">Total Bonabéri</option>
-                        <option value="TRADEX-AKWA">Tradex Akwa</option>
-                        <option value="BOCOM-NDOGPASSI">Bocom Ndogpassi</option>
-                    </optgroup>
-                    <optgroup label="YAOUNDÉ">
-                        <option value="TOTAL-BASTOS">Total Bastos</option>
-                        <option value="TRADEX-MVAN">Tradex Mvan</option>
-                    </optgroup>
-                    <option value="MANUAL">📍 REVENDEUR / AUTRE</option>
-                </select>
-                <input id="manual" type="text" placeholder="Nom du revendeur..." class="hidden w-full mt-2 bg-blue-900/20 p-3 rounded-xl text-xs border border-blue-500/30">
+                <label class="text-[9px] font-black text-slate-500 uppercase ml-1">Origine Carburant</label>
+                <div class="relative mt-1">
+                    <i class="fas fa-gas-pump absolute left-3 top-3 text-slate-500 text-xs"></i>
+                    <select id="preset" onchange="toggleMan()" class="w-full bg-slate-800 p-3 pl-8 rounded-xl text-xs font-bold border border-white/10 text-white outline-none focus:border-blue-500">
+                        <optgroup label="DOUALA">
+                            <option value="TOTAL-BONABERI">Total Bonabéri</option>
+                            <option value="TRADEX-AKWA">Tradex Akwa</option>
+                            <option value="BOCOM-NDOGPASSI">Bocom Ndogpassi</option>
+                        </optgroup>
+                        <optgroup label="YAOUNDÉ">
+                            <option value="TOTAL-BASTOS">Total Bastos</option>
+                            <option value="TRADEX-MVAN">Tradex Mvan</option>
+                        </optgroup>
+                        <option value="MANUAL">📍 REVENDEUR / AUTRE</option>
+                    </select>
+                </div>
+                <input id="manual" type="text" placeholder="Nom du revendeur..." class="hidden w-full mt-2 bg-blue-900/20 p-3 rounded-xl text-xs border border-blue-500/30 text-blue-100 placeholder-blue-300/50 outline-none">
             </div>
-            <input type="hidden" id="lat"><input type="hidden" id="lng">
+
+            <input type="hidden" id="lat">
+            <input type="hidden" id="lng">
         </div>
 
-        <button id="btn" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg uppercase text-xs tracking-widest">
-            <i class="fas fa-search mr-2"></i> Analyser
+        <button id="btn" class="w-full bg-blue-600 active:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg uppercase text-xs tracking-widest shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+            <i class="fas fa-search"></i> Lancer Analyse OMEGA
         </button>
     </main>
 
-    <div id="res-modal" class="hidden fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center">
+    <div id="res-modal" class="hidden fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+        
         <i id="icon" class="text-6xl mb-4"></i>
+        
         <h2 id="title" class="text-3xl font-black uppercase italic mb-6"></h2>
         
-        <div id="details-box" class="w-full bg-white/5 p-4 rounded-xl mb-6 text-left space-y-3">
+        <div id="details-box" class="w-full bg-white/5 p-4 rounded-xl mb-6 text-left space-y-3 border border-white/5">
             <div class="flex justify-between border-b border-white/10 pb-2">
-                <span class="text-xs text-slate-400 font-bold">EAU</span>
+                <span class="text-xs text-slate-400 font-bold uppercase">Présence Eau</span>
                 <span id="water" class="text-sm font-black"></span>
             </div>
             <div class="flex justify-between border-b border-white/10 pb-2">
-                <span class="text-xs text-slate-400 font-bold">IMPURETÉS</span>
+                <span class="text-xs text-slate-400 font-bold uppercase">Sédiments</span>
                 <span id="imp" class="text-sm font-black"></span>
             </div>
         </div>
         
-        <p id="diag" class="text-xs text-slate-300 italic pt-2 px-4 border border-white/10 p-4 rounded-xl bg-white/5"></p>
+        <p id="diag" class="text-xs text-slate-300 italic pt-2 px-4 border border-white/10 p-4 rounded-xl bg-white/5 w-full"></p>
         
-        <button onclick="location.reload()" class="mt-6 bg-white text-black font-black px-10 py-3 rounded-full text-xs uppercase">Nouveau Scan</button>
+        <button onclick="location.reload()" class="mt-8 bg-white text-black font-black px-10 py-4 rounded-full text-xs uppercase hover:bg-slate-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            Nouveau Scan
+        </button>
     </div>
 
     <canvas id="cvs" class="hidden"></canvas>
 
     <script>
-        // GPS
-        navigator.geolocation.getCurrentPosition(p => {
-            document.getElementById('lat').value = p.coords.latitude;
-            document.getElementById('lng').value = p.coords.longitude;
-            document.getElementById('gps-stat').innerHTML = `<span class="text-emerald-500">GPS OK</span>`;
-        }, e => document.getElementById('gps-stat').innerText = "GPS: Inactif");
-
-        // CAM (Optimisation Résolution pour Render)
-        const vid = document.getElementById('video-preview');
-        navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s => vid.srcObject = s);
-
-        function toggleMan() {
-            document.getElementById('manual').classList.toggle('hidden', document.getElementById('preset').value !== 'MANUAL');
+        // --- 1. GÉOLOCALISATION ---
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                p => {
+                    document.getElementById('lat').value = p.coords.latitude;
+                    document.getElementById('lng').value = p.coords.longitude;
+                    document.getElementById('gps-stat').innerHTML = `<i class="fas fa-satellite-dish text-emerald-500"></i> <span class="text-emerald-500 font-bold">GPS ACTIVE</span>`;
+                }, 
+                e => {
+                    console.warn("GPS Error", e);
+                    document.getElementById('gps-stat').innerHTML = `<i class="fas fa-times-circle text-red-500"></i> GPS: OFF`;
+                },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
         }
 
+        // --- 2. GESTION CAMÉRA ---
+        const vid = document.getElementById('video-preview');
+        // Demande caméra arrière (environment)
+        navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }
+        })
+        .then(s => vid.srcObject = s)
+        .catch(e => alert("Erreur Caméra: " + e.message));
+
+        // --- 3. UI LOGIQUE ---
+        function toggleMan() { 
+            const isManual = document.getElementById('preset').value === 'MANUAL';
+            document.getElementById('manual').classList.toggle('hidden', !isManual); 
+        }
+
+        // --- 4. DÉCLENCHEMENT DU SCAN ---
         document.getElementById('btn').onclick = () => {
             const cvs = document.getElementById('cvs');
-            // Réduction taille pour éviter crash RAM Render
+            const btn = document.getElementById('btn');
+            
+            // Calcul ratio pour capture propre
             const scale = 600 / vid.videoWidth; 
             cvs.width = 600; 
             cvs.height = vid.videoHeight * scale;
+            
+            // Capture image dans le canvas
             cvs.getContext('2d').drawImage(vid, 0, 0, cvs.width, cvs.height);
             
+            // Conversion en Blob JPG
             cvs.toBlob(async b => {
+                // Préparation FormData
                 const fd = new FormData();
                 fd.append('file', b, 'scan.jpg');
+                
+                // Récupération Source
                 let src = document.getElementById('preset').value;
                 if(src === 'MANUAL') src = document.getElementById('manual').value || 'INCONNU';
-                fd.append('station', src);
+                
+                fd.append('station', src); 
                 fd.append('category', document.getElementById('cat').value);
-                fd.append('lat', document.getElementById('lat').value);
+                fd.append('lat', document.getElementById('lat').value); 
                 fd.append('lng', document.getElementById('lng').value);
 
-                document.getElementById('btn').innerHTML = '<i class="fas fa-spinner animate-spin"></i> CALCUL...';
+                // Feedback visuel chargement
+                btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> CALCUL OMEGA...';
+                btn.disabled = true;
                 
                 try {
+                    // Envoi au serveur
                     const r = await fetch('/api/detection/detect', {method:'POST', body:fd});
                     const d = await r.json();
                     
-                    document.getElementById('res-modal').classList.remove('hidden');
+                    // Affichage Modal
+                    const modal = document.getElementById('res-modal');
                     const tit = document.getElementById('title');
                     const ico = document.getElementById('icon');
                     const det = document.getElementById('details-box');
                     
-                    // --- LOGIQUE CORRIGÉE ---
+                    modal.classList.remove('hidden');
+                    
+                    // Logique d'affichage selon verdict
                     if(d.risk_level === "REJET") {
-                        // CAS 1 : REJET (Visage, Noir, Flou)
                         tit.innerText = "NON ANALYSABLE"; 
                         tit.className = "text-3xl font-black uppercase italic mb-6 text-slate-400"; 
-                        ico.className = "fas fa-eye-slash text-slate-500 text-6xl mb-4";
-                        det.style.display = 'none'; // On cache les détails techniques inutiles
-                        
+                        ico.className = "fas fa-eye-slash text-slate-500 text-6xl mb-4"; 
+                        det.style.display = 'none'; // Pas de détails si rejeté
                     } else if(d.risk_level === "DANGER CRITIQUE") {
-                        // CAS 2 : DANGER
                         tit.innerText = "DANGER CRITIQUE"; 
                         tit.className = "text-3xl font-black uppercase italic mb-6 text-red-500 animate-pulse"; 
-                        ico.className = "fas fa-radiation text-red-500 text-6xl mb-4";
+                        ico.className = "fas fa-radiation text-red-500 text-6xl mb-4 animate-bounce"; 
                         det.style.display = 'block';
-
                     } else if (d.risk_level === "ATTENTION") {
-                        // CAS 3 : ATTENTION
                         tit.innerText = "RISQUE MOYEN"; 
                         tit.className = "text-3xl font-black uppercase italic mb-6 text-orange-500"; 
-                        ico.className = "fas fa-exclamation-triangle text-orange-500 text-6xl mb-4";
+                        ico.className = "fas fa-exclamation-triangle text-orange-500 text-6xl mb-4"; 
                         det.style.display = 'block';
-
                     } else {
-                        // CAS 4 : CONFORME (Seulement si NORMAL)
                         tit.innerText = "CONFORME"; 
                         tit.className = "text-3xl font-black uppercase italic mb-6 text-emerald-500"; 
-                        ico.className = "fas fa-check-circle text-emerald-500 text-6xl mb-4";
+                        ico.className = "fas fa-check-circle text-emerald-500 text-6xl mb-4"; 
                         det.style.display = 'block';
                     }
                     
-                    // Remplissage des données (si visible)
-                    document.getElementById('water').innerText = d.water_presence ? "DÉTECTÉE !!!" : "NON";
-                    document.getElementById('water').className = d.water_presence ? "text-sm font-black text-red-500 animate-pulse" : "text-sm font-black text-emerald-500";
-                    document.getElementById('imp').innerText = d.impurities > 1500 ? "CRITIQUES" : "FAIBLES";
-                    document.getElementById('imp').className = d.impurities > 1500 ? "text-sm font-black text-red-500" : "text-sm font-black text-emerald-500";
+                    // Remplissage Données
+                    const wElem = document.getElementById('water');
+                    wElem.innerText = d.water_presence ? "DÉTECTÉE !!!" : "NÉGATIF";
+                    wElem.className = d.water_presence ? "text-sm font-black text-red-500 animate-pulse" : "text-sm font-black text-emerald-500";
+                    
+                    const iElem = document.getElementById('imp');
+                    iElem.innerText = d.impurities > 1500 ? "CRITIQUES (" + d.impurities + ")" : "FAIBLES (" + d.impurities + ")";
+                    iElem.className = d.impurities > 1500 ? "text-sm font-black text-red-500" : "text-sm font-black text-emerald-500";
                     
                     document.getElementById('diag').innerText = d.diagnostic;
 
                 } catch(e) { 
-                    alert("Erreur Serveur: " + e.message); 
+                    alert("Erreur Serveur OMEGA: " + e.message); 
                     location.reload(); 
                 }
-            }, 'image/jpeg', 0.8);
+            }, 'image/jpeg', 0.8); // Qualité JPG 80%
         }
     </script>
 </body>
