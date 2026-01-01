@@ -11,12 +11,11 @@ requests==2.31.0
 # --- SÉCURITÉ & AUTHENTIFICATION (SPECTRE / GARDIEN) ---
 python-jose[cryptography]
 PyJWT==2.8.0
-passlib[bcrypt]
+passlib
 cryptography==42.0.0
 python-magic==0.4.27
 
 # --- MÉMOIRE & BASES DE DONNÉES (ARCHIVISTE / CHRONOS) ---
-# Note : Inclus PostgreSQL pour le déploiement sur Render/Cloud
 psycopg2-binary==2.9.9
 sqlalchemy==2.0.25
 asyncpg==0.29.0
